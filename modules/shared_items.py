@@ -44,9 +44,9 @@ def refresh_unet_list():
     modules.sd_unet.list_unets()
 
 
-def list_checkpoint_tiles(use_short=False):
+def list_checkpoint_tiles():
     import modules.sd_models
-    return modules.sd_models.checkpoint_tiles(use_short)
+    return modules.sd_models.checkpoint_tiles()
 
 
 def refresh_checkpoints():

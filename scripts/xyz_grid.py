@@ -205,14 +205,13 @@ def csv_string_to_list_strip(data_str):
 
 
 class AxisOption:
-    def __init__(self, label, type, apply, format_value=format_value_add_label, confirm=None, cost=0.0, choices=None, prepare=None):
+    def __init__(self, label, type, apply, format_value=format_value_add_label, confirm=None, cost=0.0, choices=None):
         self.label = label
         self.type = type
         self.apply = apply
         self.format_value = format_value
         self.confirm = confirm
         self.cost = cost
-        self.prepare = prepare
         self.choices = choices
 
 
@@ -537,8 +536,6 @@ class Script(scripts.Script):
 
             if opt.choices is not None and not csv_mode:
                 valslist = vals_dropdown
-            elif opt.prepare is not None:
-                valslist = opt.prepare(vals)
             else:
                 valslist = csv_string_to_list_strip(vals)
 
