@@ -5,15 +5,9 @@ import shlex
 import modules.scripts as scripts
 import gradio as gr
 
-from modules import sd_samplers, errors, sd_models
+from modules import sd_samplers, errors
 from modules.processing import Processed, process_images
 from modules.shared import state
-
-
-def process_model_tag(tag):
-    info = sd_models.get_closet_checkpoint_match(tag)
-    assert info is not None, f'Unknown checkpoint: {tag}'
-    return info.name
 
 
 def process_string_tag(tag):
@@ -33,7 +27,7 @@ def process_boolean_tag(tag):
 
 
 prompt_tags = {
-    "sd_model": process_model_tag,
+    "sd_model": None,
     "outpath_samples": process_string_tag,
     "outpath_grids": process_string_tag,
     "prompt_for_display": process_string_tag,
@@ -162,10 +156,7 @@ class Script(scripts.Script):
 
             copy_p = copy.copy(p)
             for k, v in args.items():
-                if k == "sd_model":
-                    copy_p.override_settings['sd_model_checkpoint'] = v
-                else:
-                    setattr(copy_p, k, v)
+                setattr(copy_p, k, v)
 
             proc = process_images(copy_p)
             images += proc.images

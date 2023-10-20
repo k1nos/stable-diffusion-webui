@@ -140,15 +140,14 @@ function setupExtraNetworks() {
 
 onUiLoaded(setupExtraNetworks);
 
-var re_extranet = /<([^:^>]+:[^:]+):[\d.]+>(.*)/;
-var re_extranet_g = /<([^:^>]+:[^:]+):[\d.]+>/g;
+var re_extranet = /<([^:]+:[^:]+):[\d.]+>(.*)/;
+var re_extranet_g = /\s+<([^:]+:[^:]+):[\d.]+>/g;
 
 function tryToRemoveExtraNetworkFromPrompt(textarea, text) {
     var m = text.match(re_extranet);
     var replaced = false;
     var newTextareaText;
     if (m) {
-        var extraTextBeforeNet = opts.extra_networks_add_text_separator;
         var extraTextAfterNet = m[2];
         var partToSearch = m[1];
         var foundAtPosition = -1;
@@ -162,13 +161,8 @@ function tryToRemoveExtraNetworkFromPrompt(textarea, text) {
             return found;
         });
 
-        if (foundAtPosition >= 0) {
-            if (newTextareaText.substr(foundAtPosition, extraTextAfterNet.length) == extraTextAfterNet) {
-                newTextareaText = newTextareaText.substr(0, foundAtPosition) + newTextareaText.substr(foundAtPosition + extraTextAfterNet.length);
-            }
-            if (newTextareaText.substr(foundAtPosition - extraTextBeforeNet.length, extraTextBeforeNet.length) == extraTextBeforeNet) {
-                newTextareaText = newTextareaText.substr(0, foundAtPosition - extraTextBeforeNet.length) + newTextareaText.substr(foundAtPosition);
-            }
+        if (foundAtPosition >= 0 && newTextareaText.substr(foundAtPosition, extraTextAfterNet.length) == extraTextAfterNet) {
+            newTextareaText = newTextareaText.substr(0, foundAtPosition) + newTextareaText.substr(foundAtPosition + extraTextAfterNet.length);
         }
     } else {
         newTextareaText = textarea.value.replaceAll(new RegExp(text, "g"), function(found) {
@@ -222,24 +216,27 @@ function extraNetworksSearchButton(tabs_id, event) {
 
 var globalPopup = null;
 var globalPopupInner = null;
-
 function closePopup() {
     if (!globalPopup) return;
+
     globalPopup.style.display = "none";
 }
-
 function popup(contents) {
     if (!globalPopup) {
         globalPopup = document.createElement('div');
+        globalPopup.onclick = closePopup;
         globalPopup.classList.add('global-popup');
 
         var close = document.createElement('div');
         close.classList.add('global-popup-close');
-        close.addEventListener("click", closePopup);
+        close.onclick = closePopup;
         close.title = "Close";
         globalPopup.appendChild(close);
 
         globalPopupInner = document.createElement('div');
+        globalPopupInner.onclick = function(event) {
+            event.stopPropagation(); return false;
+        };
         globalPopupInner.classList.add('global-popup-inner');
         globalPopup.appendChild(globalPopupInner);
 
@@ -338,7 +335,7 @@ function extraNetworksEditUserMetadata(event, tabname, extraPage, cardName) {
 function extraNetworksRefreshSingleCard(page, tabname, name) {
     requestGet("./sd_extra_networks/get-single-card", {page: page, tabname: tabname, name: name}, function(data) {
         if (data && data.html) {
-            var card = gradioApp().querySelector(`#${tabname}_${page.replace(" ", "_")}_cards > .card[data-name="${name}"]`);
+            var card = gradioApp().querySelector('.card[data-name=' + JSON.stringify(name) + ']'); // likely using the wrong stringify function
 
             var newDiv = document.createElement('DIV');
             newDiv.innerHTML = data.html;

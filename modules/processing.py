@@ -142,7 +142,7 @@ class StableDiffusionProcessing:
     overlay_images: list = None
     eta: float = None
     do_not_reload_embeddings: bool = False
-    denoising_strength: float = None
+    denoising_strength: float = 0
     ddim_discretize: str = None
     s_min_uncond: float = None
     s_churn: float = None
